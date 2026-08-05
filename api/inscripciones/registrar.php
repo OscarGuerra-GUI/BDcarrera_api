@@ -2,38 +2,14 @@
 
 declare(strict_types=1);
 
-header("Content-Type: application/json; charset=utf-8");
+require_once __DIR__ . "/../../config/seguridad.php";
 
-function responder(int $codigo, array $contenido): never
-{
-    http_response_code($codigo);
-    echo json_encode(
-        $contenido,
-        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
-    );
-    exit;
-}
+verificarApiKey();
 
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    responder(405, [
+    responderJson(405, [
         "success" => false,
         "mensaje" => "Método no permitido. Utiliza POST."
-    ]);
-}
-
-/*
- * Validación de la clave que enviará Power Automate.
- */
-$apiKeyConfigurada = getenv("API_KEY");
-$apiKeyRecibida = $_SERVER["HTTP_X_API_KEY"] ?? "";
-
-if (
-    !$apiKeyConfigurada ||
-    !hash_equals($apiKeyConfigurada, $apiKeyRecibida)
-) {
-    responder(401, [
-        "success" => false,
-        "mensaje" => "Acceso no autorizado."
     ]);
 }
 
@@ -41,37 +17,45 @@ $contenido = file_get_contents("php://input");
 $datos = json_decode($contenido, true);
 
 if (!is_array($datos)) {
-    responder(400, [
+    responderJson(400, [
         "success" => false,
-        "mensaje" => "El cuerpo de la solicitud no contiene JSON válido."
+        "mensaje" => "El cuerpo de la solicitud no contiene un JSON válido."
     ]);
 }
 
 $nombre = trim((string) ($datos["nombre_responsable"] ?? ""));
 $telefono = trim((string) ($datos["telefono"] ?? ""));
+
 $cantidad = filter_var(
     $datos["cantidad_participantes"] ?? null,
     FILTER_VALIDATE_INT
 );
 
 if ($nombre === "" || $telefono === "" || $cantidad === false) {
-    responder(422, [
+    responderJson(422, [
         "success" => false,
-        "mensaje" => "Nombre, teléfono y cantidad son obligatorios."
+        "mensaje" => "Nombre, teléfono y cantidad de participantes son obligatorios."
     ]);
 }
 
 if ($cantidad < 1 || $cantidad > 10) {
-    responder(422, [
+    responderJson(422, [
         "success" => false,
         "mensaje" => "La cantidad de participantes debe estar entre 1 y 10."
     ]);
 }
 
-if (mb_strlen($nombre) > 150 || mb_strlen($telefono) > 20) {
-    responder(422, [
+if (mb_strlen($nombre) > 150) {
+    responderJson(422, [
         "success" => false,
-        "mensaje" => "Uno de los datos supera la longitud permitida."
+        "mensaje" => "El nombre del responsable supera los 150 caracteres."
+    ]);
+}
+
+if (mb_strlen($telefono) > 20) {
+    responderJson(422, [
+        "success" => false,
+        "mensaje" => "El teléfono supera los 20 caracteres."
     ]);
 }
 
@@ -93,15 +77,20 @@ try {
         ":cantidad_participantes" => $cantidad
     ]);
 
-    responder(201, [
+    responderJson(201, [
         "success" => true,
         "mensaje" => "Inscripción guardada correctamente.",
-        "id" => (int) $conexion->lastInsertId()
+        "data" => [
+            "id" => (int) $conexion->lastInsertId(),
+            "nombre_responsable" => $nombre,
+            "telefono" => $telefono,
+            "cantidad_participantes" => $cantidad
+        ]
     ]);
 } catch (Throwable $e) {
     error_log("Error al registrar inscripción: " . $e->getMessage());
 
-    responder(500, [
+    responderJson(500, [
         "success" => false,
         "mensaje" => "Ocurrió un error al guardar la inscripción."
     ]);
