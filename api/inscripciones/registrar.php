@@ -2,7 +2,8 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . "/../../config/seguridad.php";
+require_once __DIR__ . '/../../config/seguridad.php';
+require_once __DIR__ . '/../../config/conexion.php';
 
 verificarApiKey();
 
@@ -14,12 +15,12 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 }
 
 $contenido = file_get_contents("php://input");
-$datos = json_decode($contenido, true);
+$datos = json_decode($contenido ?: "", true);
 
 if (!is_array($datos)) {
     responderJson(400, [
         "success" => false,
-        "mensaje" => "El cuerpo de la solicitud no contiene un JSON válido."
+        "mensaje" => "El cuerpo de la solicitud debe contener JSON válido."
     ]);
 }
 
@@ -31,42 +32,35 @@ $cantidad = filter_var(
     FILTER_VALIDATE_INT
 );
 
-if ($nombre === "" || $telefono === "" || $cantidad === false) {
+if (
+    $nombre === "" ||
+    $telefono === "" ||
+    $cantidad === false ||
+    $cantidad < 1
+) {
     responderJson(422, [
         "success" => false,
         "mensaje" => "Nombre, teléfono y cantidad de participantes son obligatorios."
     ]);
 }
 
-if ($cantidad < 1 || $cantidad > 10) {
-    responderJson(422, [
-        "success" => false,
-        "mensaje" => "La cantidad de participantes debe estar entre 1 y 10."
-    ]);
-}
-
-if (mb_strlen($nombre) > 150) {
-    responderJson(422, [
-        "success" => false,
-        "mensaje" => "El nombre del responsable supera los 150 caracteres."
-    ]);
-}
-
-if (mb_strlen($telefono) > 20) {
-    responderJson(422, [
-        "success" => false,
-        "mensaje" => "El teléfono supera los 20 caracteres."
-    ]);
-}
-
 try {
-    require_once __DIR__ . "/../../config/conexion.php";
+
+    $conexion = obtenerConexion();
 
     $sql = "
         INSERT INTO prueba_inscripciones
-            (nombre_responsable, telefono, cantidad_participantes)
+        (
+            nombre_responsable,
+            telefono,
+            cantidad_participantes
+        )
         VALUES
-            (:nombre_responsable, :telefono, :cantidad_participantes)
+        (
+            :nombre_responsable,
+            :telefono,
+            :cantidad_participantes
+        )
     ";
 
     $consulta = $conexion->prepare($sql);
@@ -79,19 +73,16 @@ try {
 
     responderJson(201, [
         "success" => true,
-        "mensaje" => "Inscripción guardada correctamente.",
-        "data" => [
-            "id" => (int) $conexion->lastInsertId(),
-            "nombre_responsable" => $nombre,
-            "telefono" => $telefono,
-            "cantidad_participantes" => $cantidad
-        ]
+        "mensaje" => "Inscripción registrada correctamente.",
+        "id" => (int) $conexion->lastInsertId()
     ]);
-} catch (Throwable $e) {
-    error_log("Error al registrar inscripción: " . $e->getMessage());
+
+} catch (PDOException $e) {
+
+    error_log($e->getMessage());
 
     responderJson(500, [
         "success" => false,
-        "mensaje" => "Ocurrió un error al guardar la inscripción."
+        "mensaje" => "Error al guardar la inscripción en la base de datos."
     ]);
 }
