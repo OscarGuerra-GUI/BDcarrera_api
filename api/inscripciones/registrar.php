@@ -25,55 +25,42 @@ if (!is_array($datos)) {
 }
 
 
-$responsable = $datos["responsable"] ?? null;
+$responsable = $datos["responsable"] ?? [];
 
-if (!is_array($responsable)) {
-    responderJson(422, [
-        "success" => false,
-        "mensaje" => "No se recibieron correctamente los datos del responsable."
-    ]);
-}
-
-$nombre = trim(
-    (string) ($responsable["nombre_completo"] ?? "")
-);
-
-$telefono = trim(
-    (string) ($responsable["telefono"] ?? "")
-);
-
-$correo = trim(
-    (string) ($responsable["correo"] ?? "")
-);
-
-
+$nombre = trim((string) ($responsable["nombre_completo"] ?? ""));
+$telefono = trim((string) ($responsable["telefono"] ?? ""));
+$correo = trim((string) ($responsable["correo"] ?? ""));
 
 $opcionInscripcion = trim(
     (string) ($datos["opcion_inscripcion"] ?? "")
 );
 
 
-
-if ($nombre === "") {
+if ($nombre === "" || $telefono === "") {
     responderJson(422, [
         "success" => false,
-        "mensaje" => "El nombre completo del responsable es obligatorio."
+        "mensaje" => "Nombre y teléfono del responsable son obligatorios."
     ]);
 }
 
-if ($telefono === "") {
-    responderJson(422, [
-        "success" => false,
-        "mensaje" => "El teléfono del responsable es obligatorio."
-    ]);
-}
+
+$idEvento = 1;
+$idPaquete = 1;
+$cantidadParticipantes = 1;
+
+$estadoInscripcion = "REGISTRADA";
+$estadoPago = "PENDIENTE";
 
 
 try {
 
     $conexion = obtenerConexion();
 
-    $sql = "
+
+    $conexion->beginTransaction();
+
+
+    $sqlResponsable = "
         INSERT INTO RESPONSABLE
         (
             nombre_completo,
@@ -88,36 +75,98 @@ try {
         )
     ";
 
-    $consulta = $conexion->prepare($sql);
+    $consultaResponsable = $conexion->prepare($sqlResponsable);
 
-    $consulta->execute([
+    $consultaResponsable->execute([
         ":nombre_completo" => $nombre,
         ":telefono" => $telefono,
-
-        // Si Forms no envía correo, guardamos NULL.
         ":correo" => $correo !== "" ? $correo : null
     ]);
+
 
     $idResponsable = (int) $conexion->lastInsertId();
 
 
+    $folio = "CB2026-" . str_pad(
+        (string) $idResponsable,
+        5,
+        "0",
+        STR_PAD_LEFT
+    );
+
+
+    $sqlInscripcion = "
+        INSERT INTO INSCRIPCION
+        (
+            id_responsable,
+            id_evento,
+            id_paquete,
+            folio,
+            cantidad_participantes,
+            estado_inscripcion,
+            estado_pago
+        )
+        VALUES
+        (
+            :id_responsable,
+            :id_evento,
+            :id_paquete,
+            :folio,
+            :cantidad_participantes,
+            :estado_inscripcion,
+            :estado_pago
+        )
+    ";
+
+    $consultaInscripcion = $conexion->prepare($sqlInscripcion);
+
+    $consultaInscripcion->execute([
+        ":id_responsable" => $idResponsable,
+        ":id_evento" => $idEvento,
+        ":id_paquete" => $idPaquete,
+        ":folio" => $folio,
+        ":cantidad_participantes" => $cantidadParticipantes,
+        ":estado_inscripcion" => $estadoInscripcion,
+        ":estado_pago" => $estadoPago
+    ]);
+
+    $idInscripcion = (int) $conexion->lastInsertId();
+
+
+    $conexion->commit();
+
+
     responderJson(201, [
         "success" => true,
-        "mensaje" => "Responsable registrado correctamente.",
-        "id_responsable" => $idResponsable,
+        "mensaje" => "Responsable e inscripción registrados correctamente.",
 
-        // Solo para comprobar que Power Automate manda esta respuesta.
-        "opcion_inscripcion_recibida" => $opcionInscripcion
+        "id_responsable" => $idResponsable,
+        "id_inscripcion" => $idInscripcion,
+        "folio" => $folio,
+
+        "opcion_inscripcion_recibida" => $opcionInscripcion,
+
+        "valores_temporales" => [
+            "id_evento" => $idEvento,
+            "id_paquete" => $idPaquete,
+            "cantidad_participantes" => $cantidadParticipantes
+        ]
     ]);
 
 } catch (PDOException $e) {
 
+
+    if (isset($conexion) && $conexion->inTransaction()) {
+        $conexion->rollBack();
+    }
+
     error_log(
-        "Error al registrar RESPONSABLE: " . $e->getMessage()
+        "Error al registrar RESPONSABLE + INSCRIPCION: " .
+        $e->getMessage()
     );
 
     responderJson(500, [
         "success" => false,
-        "mensaje" => "Error al registrar al responsable en la base de datos."
+        "mensaje" => "Error al guardar el responsable y la inscripción."
     ]);
 }
