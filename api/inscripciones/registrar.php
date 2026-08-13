@@ -24,65 +24,100 @@ if (!is_array($datos)) {
     ]);
 }
 
-$nombre = trim((string) ($datos["nombre_responsable"] ?? ""));
-$telefono = trim((string) ($datos["telefono"] ?? ""));
 
-$cantidad = filter_var(
-    $datos["cantidad_participantes"] ?? null,
-    FILTER_VALIDATE_INT
-);
+$responsable = $datos["responsable"] ?? null;
 
-if (
-    $nombre === "" ||
-    $telefono === "" ||
-    $cantidad === false ||
-    $cantidad < 1
-) {
+if (!is_array($responsable)) {
     responderJson(422, [
         "success" => false,
-        "mensaje" => "Nombre, teléfono y cantidad de participantes son obligatorios."
+        "mensaje" => "No se recibieron correctamente los datos del responsable."
     ]);
 }
+
+$nombre = trim(
+    (string) ($responsable["nombre_completo"] ?? "")
+);
+
+$telefono = trim(
+    (string) ($responsable["telefono"] ?? "")
+);
+
+$correo = trim(
+    (string) ($responsable["correo"] ?? "")
+);
+
+
+
+$opcionInscripcion = trim(
+    (string) ($datos["opcion_inscripcion"] ?? "")
+);
+
+
+
+if ($nombre === "") {
+    responderJson(422, [
+        "success" => false,
+        "mensaje" => "El nombre completo del responsable es obligatorio."
+    ]);
+}
+
+if ($telefono === "") {
+    responderJson(422, [
+        "success" => false,
+        "mensaje" => "El teléfono del responsable es obligatorio."
+    ]);
+}
+
 
 try {
 
     $conexion = obtenerConexion();
 
     $sql = "
-        INSERT INTO prueba_inscripciones
+        INSERT INTO RESPONSABLE
         (
-            nombre_responsable,
+            nombre_completo,
             telefono,
-            cantidad_participantes
+            correo
         )
         VALUES
         (
-            :nombre_responsable,
+            :nombre_completo,
             :telefono,
-            :cantidad_participantes
+            :correo
         )
     ";
 
     $consulta = $conexion->prepare($sql);
 
     $consulta->execute([
-        ":nombre_responsable" => $nombre,
+        ":nombre_completo" => $nombre,
         ":telefono" => $telefono,
-        ":cantidad_participantes" => $cantidad
+
+        // Si Forms no envía correo, guardamos NULL.
+        ":correo" => $correo !== "" ? $correo : null
     ]);
+
+    $idResponsable = (int) $conexion->lastInsertId();
+
 
     responderJson(201, [
         "success" => true,
-        "mensaje" => "Inscripción registrada correctamente.",
-        "id" => (int) $conexion->lastInsertId()
+        "mensaje" => "Responsable registrado correctamente.",
+        "id_responsable" => $idResponsable,
+
+        // Solo para comprobar que Power Automate manda esta respuesta.
+        "opcion_inscripcion_recibida" => $opcionInscripcion
     ]);
 
 } catch (PDOException $e) {
 
-    error_log($e->getMessage());
+    error_log(
+        "Error al registrar RESPONSABLE: " . $e->getMessage()
+    );
 
     responderJson(500, [
         "success" => false,
-        "mensaje" => "Error al guardar la inscripción en la base de datos."
+        "mensaje" => "Error al registrar al responsable en la base de datos."
     ]);
 }
