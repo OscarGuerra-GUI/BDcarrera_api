@@ -8,7 +8,15 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 header("Content-Type: application/json; charset=utf-8");
 
+
+/*
+|--------------------------------------------------------------------------
+| VALIDAR MÉTODO
+|--------------------------------------------------------------------------
+*/
+
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+
     http_response_code(405);
 
     echo json_encode([
@@ -19,10 +27,18 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     exit;
 }
 
+
+/*
+|--------------------------------------------------------------------------
+| VALIDAR ARCHIVO
+|--------------------------------------------------------------------------
+*/
+
 if (
     !isset($_FILES["archivo"]) ||
     $_FILES["archivo"]["error"] !== UPLOAD_ERR_OK
 ) {
+
     http_response_code(400);
 
     echo json_encode([
@@ -33,45 +49,89 @@ if (
     exit;
 }
 
+
 $rutaTemporal = $_FILES["archivo"]["tmp_name"];
+
 
 try {
 
+    /*
+    |--------------------------------------------------------------------------
+    | ABRIR EXCEL
+    |--------------------------------------------------------------------------
+    */
+
     $spreadsheet = IOFactory::load($rutaTemporal);
+
     $hoja = $spreadsheet->getActiveSheet();
 
     $ultimaFila = $hoja->getHighestDataRow();
 
     $registros = [];
 
+
+    /*
+    |--------------------------------------------------------------------------
+    | RECORRER RESPUESTAS
+    |--------------------------------------------------------------------------
+    */
+
     for ($fila = 2; $fila <= $ultimaFila; $fila++) {
 
-        $responseId = trim(
-            (string) $hoja->getCell("A{$fila}")->getValue()
+        $responseId = celda(
+            $hoja,
+            "A",
+            $fila
         );
+
 
         if ($responseId === "") {
             continue;
         }
 
-        $nombreResponsable = trim(
-            (string) $hoja->getCell("F{$fila}")->getValue()
+
+        /*
+        |--------------------------------------------------------------------------
+        | RESPONSABLE
+        |--------------------------------------------------------------------------
+        */
+
+        $nombreResponsable = celda(
+            $hoja,
+            "F",
+            $fila
         );
 
-        $telefono = trim(
-            (string) $hoja->getCell("G{$fila}")->getValue()
+        $telefono = celda(
+            $hoja,
+            "G",
+            $fila
         );
 
-        $correo = trim(
-            (string) $hoja->getCell("H{$fila}")->getValue()
+        $correo = celda(
+            $hoja,
+            "H",
+            $fila
         );
 
-        $opcion = trim(
-            (string) $hoja->getCell("I{$fila}")->getValue()
+
+        /*
+        |--------------------------------------------------------------------------
+        | OPCIÓN DE INSCRIPCIÓN
+        |--------------------------------------------------------------------------
+        */
+
+        $opcion = celda(
+            $hoja,
+            "I",
+            $fila
         );
+
 
         $participantes = [];
+
         $camisaExtra = null;
+
 
         /*
         |--------------------------------------------------------------------------
@@ -79,10 +139,7 @@ try {
         |--------------------------------------------------------------------------
         */
 
-        if (
-            stripos($opcion, "1 participante") !== false ||
-            stripos($opcion, "1 persona") !== false
-        ) {
+        if ($opcion === "Paquete 1 participante") {
 
             agregarParticipante(
                 $participantes,
@@ -92,9 +149,31 @@ try {
                 "L",
                 "M",
                 "N",
-                false
+                false,
+                celda($hoja, "K", $fila)
             );
         }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PAQUETE ESTUDIANTE INDIVIDUAL
+        |--------------------------------------------------------------------------
+        */
+
+        elseif ($opcion === "Paquete Estudiante") {
+
+            agregarParticipante(
+                $participantes,
+                $hoja,
+                $fila,
+                "O",
+                "P",
+                "Q",
+                "R"
+            );
+        }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -102,10 +181,7 @@ try {
         |--------------------------------------------------------------------------
         */
 
-        elseif (
-            stripos($opcion, "2 particip") !== false ||
-            stripos($opcion, "2 persona") !== false
-        ) {
+        elseif ($opcion === "Paquete 2 participantes") {
 
             agregarParticipante(
                 $participantes,
@@ -128,21 +204,46 @@ try {
             );
         }
 
+
         /*
         |--------------------------------------------------------------------------
         | PAQUETE 3 PARTICIPANTES
         |--------------------------------------------------------------------------
         */
 
-        elseif (
-            stripos($opcion, "3 particip") !== false ||
-            stripos($opcion, "3 persona") !== false
-        ) {
+        elseif ($opcion === "Paquete 3 participantes") {
 
-            agregarParticipante($participantes, $hoja, $fila, "AA", "AB", "AC", "AD");
-            agregarParticipante($participantes, $hoja, $fila, "AE", "AF", "AG", "AH");
-            agregarParticipante($participantes, $hoja, $fila, "AI", "AJ", "AK", "AL");
+            agregarParticipante(
+                $participantes,
+                $hoja,
+                $fila,
+                "AA",
+                "AB",
+                "AC",
+                "AD"
+            );
+
+            agregarParticipante(
+                $participantes,
+                $hoja,
+                $fila,
+                "AE",
+                "AF",
+                "AG",
+                "AH"
+            );
+
+            agregarParticipante(
+                $participantes,
+                $hoja,
+                $fila,
+                "AI",
+                "AJ",
+                "AK",
+                "AL"
+            );
         }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -150,16 +251,49 @@ try {
         |--------------------------------------------------------------------------
         */
 
-        elseif (
-            stripos($opcion, "4 particip") !== false ||
-            stripos($opcion, "4 persona") !== false
-        ) {
+        elseif ($opcion === "Paquete 4 participantes") {
 
-            agregarParticipante($participantes, $hoja, $fila, "AM", "AN", "AO", "AP");
-            agregarParticipante($participantes, $hoja, $fila, "AQ", "AR", "AS", "AT");
-            agregarParticipante($participantes, $hoja, $fila, "AU", "AV", "AW", "AX");
-            agregarParticipante($participantes, $hoja, $fila, "AY", "AZ", "BA", "BB");
+            agregarParticipante(
+                $participantes,
+                $hoja,
+                $fila,
+                "AM",
+                "AN",
+                "AO",
+                "AP"
+            );
+
+            agregarParticipante(
+                $participantes,
+                $hoja,
+                $fila,
+                "AQ",
+                "AR",
+                "AS",
+                "AT"
+            );
+
+            agregarParticipante(
+                $participantes,
+                $hoja,
+                $fila,
+                "AU",
+                "AV",
+                "AW",
+                "AX"
+            );
+
+            agregarParticipante(
+                $participantes,
+                $hoja,
+                $fila,
+                "AY",
+                "AZ",
+                "BA",
+                "BB"
+            );
         }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -167,30 +301,69 @@ try {
         |--------------------------------------------------------------------------
         */
 
-        elseif (
-            stripos($opcion, "5 particip") !== false ||
-            stripos($opcion, "5 persona") !== false
-        ) {
+        elseif ($opcion === "Paquete 5 participantes") {
 
-            agregarParticipante($participantes, $hoja, $fila, "BC", "BD", "BE", "BF");
-            agregarParticipante($participantes, $hoja, $fila, "BG", "BH", "BI", "BJ");
-            agregarParticipante($participantes, $hoja, $fila, "BK", "BL", "BM", "BN");
-            agregarParticipante($participantes, $hoja, $fila, "BO", "BP", "BQ", "BR");
-            agregarParticipante($participantes, $hoja, $fila, "BS", "BT", "BU", "BV");
+            agregarParticipante(
+                $participantes,
+                $hoja,
+                $fila,
+                "BC",
+                "BD",
+                "BE",
+                "BF"
+            );
+
+            agregarParticipante(
+                $participantes,
+                $hoja,
+                $fila,
+                "BG",
+                "BH",
+                "BI",
+                "BJ"
+            );
+
+            agregarParticipante(
+                $participantes,
+                $hoja,
+                $fila,
+                "BK",
+                "BL",
+                "BM",
+                "BN"
+            );
+
+            agregarParticipante(
+                $participantes,
+                $hoja,
+                $fila,
+                "BO",
+                "BP",
+                "BQ",
+                "BR"
+            );
+
+            agregarParticipante(
+                $participantes,
+                $hoja,
+                $fila,
+                "BS",
+                "BT",
+                "BU",
+                "BV"
+            );
         }
+
 
         /*
         |--------------------------------------------------------------------------
-        | INDIVIDUAL ESPECIAL
-        | Niño / discapacidad / adulto mayor / proceso oncológico
+        | PERSONA CON DISCAPACIDAD / ADULTO MAYOR / PROCESO ONCOLÓGICO
         |--------------------------------------------------------------------------
         */
 
         elseif (
-            stripos($opcion, "niñ") !== false ||
-            stripos($opcion, "discapacidad") !== false ||
-            stripos($opcion, "adulto mayor") !== false ||
-            stripos($opcion, "oncol") !== false
+            $opcion ===
+            "Persona con Discapacidad, Adulto mayor o en Proceso Oncológico"
         ) {
 
             agregarParticipante(
@@ -204,16 +377,37 @@ try {
             );
         }
 
+
         /*
         |--------------------------------------------------------------------------
         | PAQUETE FAMILIAR
         |--------------------------------------------------------------------------
         */
 
-        elseif (stripos($opcion, "familiar") !== false) {
+        elseif (
+            $opcion ===
+            "Paquete Familiar (2 adultos y 1 niño)"
+        ) {
 
-            agregarParticipante($participantes, $hoja, $fila, "CA", "CB", "CC", "CD");
-            agregarParticipante($participantes, $hoja, $fila, "CE", "CF", "CG", "CH");
+            agregarParticipante(
+                $participantes,
+                $hoja,
+                $fila,
+                "CA",
+                "CB",
+                "CC",
+                "CD"
+            );
+
+            agregarParticipante(
+                $participantes,
+                $hoja,
+                $fila,
+                "CE",
+                "CF",
+                "CG",
+                "CH"
+            );
 
             agregarParticipante(
                 $participantes,
@@ -225,6 +419,16 @@ try {
                 "CK",
                 true
             );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | PAQUETE NIÑO
+        |--------------------------------------------------------------------------
+        */
+
+        elseif ($opcion === "Paquete niño") {
 
             agregarParticipante(
                 $participantes,
@@ -238,15 +442,19 @@ try {
             );
         }
 
+
         /*
         |--------------------------------------------------------------------------
         | PAQUETE COLABORATIVO
         |--------------------------------------------------------------------------
         */
 
-        elseif (stripos($opcion, "colaborativo") !== false) {
+        elseif (
+            $opcion ===
+            "Paquete Colaborativo (10 personas + 1 Kit de regalo)"
+        ) {
 
-            $columnas = [
+            $grupos = [
                 ["CO", "CP", "CQ", "CR"],
                 ["CS", "CT", "CU", "CV"],
                 ["CW", "CX", "CY", "CZ"],
@@ -259,7 +467,9 @@ try {
                 ["DY", "DZ", "EA", "EB"]
             ];
 
-            foreach ($columnas as $grupo) {
+
+            foreach ($grupos as $grupo) {
+
                 agregarParticipante(
                     $participantes,
                     $hoja,
@@ -271,34 +481,61 @@ try {
                 );
             }
 
-            $nombreKit = trim(
-                (string) $hoja->getCell("EC{$fila}")->getValue()
+
+            $datoKit = celda(
+                $hoja,
+                "EC",
+                $fila
             );
 
-            $sexoKit = trim(
-                (string) $hoja->getCell("ED{$fila}")->getValue()
+            $sexoKit = celda(
+                $hoja,
+                "ED",
+                $fila
             );
 
-            $camisaKit = trim(
-                (string) $hoja->getCell("EE{$fila}")->getValue()
+            $camisaKit = celda(
+                $hoja,
+                "EE",
+                $fila
             );
 
-            if ($nombreKit !== "" || $camisaKit !== "") {
 
-                [$tipoPersonaKit, $tallaKit] =
-                    separarCamisa($camisaKit);
+            if ($camisaKit !== "") {
+
+                [
+                    $tipoPersonaKit,
+                    $tallaKit
+                ] = separarCamisa($camisaKit);
+
 
                 $camisaExtra = [
-                    "nombre" => $nombreKit,
-                    "sexo" => $sexoKit,
-                    "tipo_persona" => $tipoPersonaKit,
-                    "talla" => $tallaKit,
-                    "tipo_camisa" => $tipoPersonaKit,
-                    "cantidad" => 1,
-                    "motivo" => "Kit de regalo paquete colaborativo"
+
+                    "nombre" =>
+                        $datoKit,
+
+                    "sexo" =>
+                        $sexoKit,
+
+                    "tipo_persona" =>
+                        $tipoPersonaKit,
+
+                    "talla" =>
+                        $tallaKit,
+
+                    "tipo_camisa" =>
+                        $tipoPersonaKit,
+
+                    "cantidad" =>
+                        1,
+
+                    "motivo" =>
+                        "Kit de regalo paquete colaborativo"
+
                 ];
             }
         }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -306,9 +543,12 @@ try {
         |--------------------------------------------------------------------------
         */
 
-        elseif (stripos($opcion, "estudiante") !== false) {
+        elseif (
+            $opcion ===
+            "Paquete estudiantes (10 estudiantes + 1 Kit de regalo)"
+        ) {
 
-            $columnas = [
+            $grupos = [
                 ["EF", "EG", "EH", "EI"],
                 ["EJ", "EK", "EL", "EM"],
                 ["EN", "EO", "EP", "EQ"],
@@ -321,7 +561,8 @@ try {
                 ["FP", "FQ", "FR", "FS"]
             ];
 
-            foreach ($columnas as $grupo) {
+
+            foreach ($grupos as $grupo) {
 
                 agregarParticipante(
                     $participantes,
@@ -334,71 +575,175 @@ try {
                 );
             }
 
-            $camisaKit = trim(
-                (string) $hoja->getCell("FV{$fila}")->getValue()
+
+            $datoKit = celda(
+                $hoja,
+                "FT",
+                $fila
             );
+
+            $sexoKit = celda(
+                $hoja,
+                "FU",
+                $fila
+            );
+
+            $camisaKit = celda(
+                $hoja,
+                "FV",
+                $fila
+            );
+
 
             if ($camisaKit !== "") {
 
-                [$tipoPersonaKit, $tallaKit] =
-                    separarCamisa($camisaKit);
+                [
+                    $tipoPersonaKit,
+                    $tallaKit
+                ] = separarCamisa($camisaKit);
+
 
                 $camisaExtra = [
-                    "nombre" => trim(
-                        (string) $hoja->getCell("FT{$fila}")->getValue()
-                    ),
-                    "sexo" => trim(
-                        (string) $hoja->getCell("FU{$fila}")->getValue()
-                    ),
-                    "tipo_persona" => $tipoPersonaKit,
-                    "talla" => $tallaKit,
-                    "tipo_camisa" => $tipoPersonaKit,
-                    "cantidad" => 1,
-                    "motivo" => "Kit de regalo paquete estudiantes"
+
+                    "nombre" =>
+                        $datoKit,
+
+                    "sexo" =>
+                        $sexoKit,
+
+                    "tipo_persona" =>
+                        $tipoPersonaKit,
+
+                    "talla" =>
+                        $tallaKit,
+
+                    "tipo_camisa" =>
+                        $tipoPersonaKit,
+
+                    "cantidad" =>
+                        1,
+
+                    "motivo" =>
+                        "Kit de regalo paquete estudiantes"
+
                 ];
             }
         }
 
+
+        /*
+        |--------------------------------------------------------------------------
+        | OPCIÓN NO RECONOCIDA
+        |--------------------------------------------------------------------------
+        */
+
+        else {
+
+            throw new RuntimeException(
+                "Opción de inscripción no reconocida en la respuesta " .
+                $responseId .
+                ": " .
+                $opcion
+            );
+        }
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | CREAR REGISTRO FINAL
+        |--------------------------------------------------------------------------
+        */
+
         $registros[] = [
-            "response_id_forms" => $responseId,
+
+            "response_id_forms" =>
+                $responseId,
 
             "responsable" => [
-                "nombre_completo" => $nombreResponsable,
-                "telefono" => $telefono,
-                "correo" => $correo
+
+                "nombre_completo" =>
+                    $nombreResponsable,
+
+                "telefono" =>
+                    $telefono,
+
+                "correo" =>
+                    $correo
+
             ],
 
             "inscripcion" => [
-                "id_evento" => 1,
-                "opcion_inscripcion" => $opcion
+
+                "id_evento" =>
+                    1,
+
+                "opcion_inscripcion" =>
+                    $opcion
+
             ],
 
-            "participantes" => $participantes,
+            "participantes" =>
+                $participantes,
 
-            "camisa_extra" => $camisaExtra
+            "camisa_extra" =>
+                $camisaExtra
+
         ];
     }
 
-    echo json_encode([
-        "success" => true,
-        "total" => count($registros),
-        "registros" => $registros
-    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+    echo json_encode(
+        [
+            "success" => true,
+            "total" => count($registros),
+            "registros" => $registros
+        ],
+        JSON_UNESCAPED_UNICODE |
+        JSON_UNESCAPED_SLASHES |
+        JSON_PRETTY_PRINT
+    );
+
 
 } catch (Throwable $e) {
 
     http_response_code(500);
 
-    echo json_encode([
-        "success" => false,
-        "mensaje" => $e->getMessage()
-    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    echo json_encode(
+        [
+            "success" => false,
+            "mensaje" => $e->getMessage()
+        ],
+        JSON_UNESCAPED_UNICODE |
+        JSON_UNESCAPED_SLASHES
+    );
 }
 
 
 /*
 |--------------------------------------------------------------------------
-| FUNCIONES
+| LEER CELDA
+|--------------------------------------------------------------------------
+*/
+
+function celda(
+    $hoja,
+    string $columna,
+    int $fila
+): string {
+
+    $valor = $hoja
+        ->getCell($columna . $fila)
+        ->getValue();
+
+    return trim(
+        (string) ($valor ?? "")
+    );
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| AGREGAR PARTICIPANTE
 |--------------------------------------------------------------------------
 */
 
@@ -410,73 +755,158 @@ function agregarParticipante(
     ?string $colSexo,
     string $colCamisa,
     string $colCategoria,
-    bool $esNino = false
+    bool $forzarNino = false,
+    ?string $codigoPatrocinador = null
 ): void {
 
-    $nombre = trim(
-        (string) $hoja->getCell($colNombre . $fila)->getValue()
+    $nombre = celda(
+        $hoja,
+        $colNombre,
+        $fila
     );
+
 
     if ($nombre === "") {
         return;
     }
 
+
     $sexo = "";
 
     if ($colSexo !== null) {
-        $sexo = trim(
-            (string) $hoja->getCell($colSexo . $fila)->getValue()
+
+        $sexo = celda(
+            $hoja,
+            $colSexo,
+            $fila
         );
     }
 
-    $camisa = trim(
-        (string) $hoja->getCell($colCamisa . $fila)->getValue()
+
+    $camisa = celda(
+        $hoja,
+        $colCamisa,
+        $fila
     );
 
-    $categoria = trim(
-        (string) $hoja->getCell($colCategoria . $fila)->getValue()
+
+    $categoria = celda(
+        $hoja,
+        $colCategoria,
+        $fila
     );
 
-    [$tipoPersona, $talla] = separarCamisa($camisa);
 
-    if ($esNino) {
+    [
+        $tipoPersona,
+        $talla
+    ] = separarCamisa($camisa);
+
+
+    if ($forzarNino) {
+
         $tipoPersona = "Niño";
     }
 
+
+    $codigoPatrocinador =
+        trim((string) $codigoPatrocinador);
+
+
+    if ($codigoPatrocinador === "") {
+
+        $codigoPatrocinador = null;
+    }
+
+
     $participantes[] = [
-        "nombre_completo" => $nombre,
-        "sexo" => $sexo,
-        "tipo_persona" => $tipoPersona,
-        "categoria" => $categoria,
-        "talla" => $talla,
-        "tipo_camisa" => $tipoPersona,
-        "codigo_patrocinador" => null
+
+        "nombre_completo" =>
+            $nombre,
+
+        "sexo" =>
+            $sexo,
+
+        "tipo_persona" =>
+            $tipoPersona,
+
+        "categoria" =>
+            $categoria,
+
+        "talla" =>
+            $talla,
+
+        "tipo_camisa" =>
+            $tipoPersona,
+
+        "codigo_patrocinador" =>
+            $codigoPatrocinador
+
     ];
 }
 
 
-function separarCamisa(string $texto): array
-{
+/*
+|--------------------------------------------------------------------------
+| SEPARAR CAMISA
+|--------------------------------------------------------------------------
+*/
+
+function separarCamisa(
+    string $texto
+): array {
+
     $texto = trim(
-        str_replace("\xc2\xa0", " ", $texto)
+        str_replace(
+            "\xc2\xa0",
+            " ",
+            $texto
+        )
     );
 
+
     if ($texto === "") {
-        return ["", ""];
+
+        return [
+            "",
+            ""
+        ];
     }
+
 
     if (
         preg_match(
-            '/^(Adulto|Niñ[oa]|Niño|Niña)\s+Talla\s+(.+)$/iu',
+            '/^(Adulto|Niño|Niña|Niñ@)\s+Talla\s+(.+)$/ui',
             $texto,
             $coincidencias
         )
     ) {
+
+        $tipoPersona =
+            trim($coincidencias[1]);
+
+        $talla =
+            trim($coincidencias[2]);
+
+
+        if (
+            $tipoPersona === "Niña" ||
+            $tipoPersona === "Niñ@"
+        ) {
+
+            $tipoPersona = "Niño";
+        }
+
+
         return [
-            trim($coincidencias[1]),
-            trim($coincidencias[2])
+            $tipoPersona,
+            $talla
         ];
     }
 
-    return ["Adulto", trim($texto)];
+
+    throw new RuntimeException(
+        "No fue posible interpretar la talla/camisa: " .
+        $texto
+    );
 }
