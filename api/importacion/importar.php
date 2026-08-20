@@ -52,6 +52,19 @@ $errores = 0;
 
 $resultados = [];
 
+/*
+|--------------------------------------------------------------------------
+| URL BASE PARA LOS QR
+|--------------------------------------------------------------------------
+| Si después configuras APP_BASE_URL en Railway, se usará automáticamente.
+| Mientras tanto utiliza tu dominio actual.
+*/
+$baseUrl = rtrim(
+    getenv("APP_BASE_URL")
+        ?: "https://bdcarreraapi-production.up.railway.app",
+    "/"
+);
+
 
 foreach ($registros as $indice => $registro) {
 
@@ -80,10 +93,14 @@ foreach ($registros as $indice => $registro) {
 
     $sqlDuplicado = "
         SELECT
-            id_inscripcion,
-            folio
-        FROM INSCRIPCION
-        WHERE response_id_forms = :response_id
+            i.id_inscripcion,
+            i.folio,
+            q.token
+        FROM INSCRIPCION i
+        LEFT JOIN CODIGO_QR q
+            ON q.id_inscripcion = i.id_inscripcion
+           AND q.estado = 'ACTIVO'
+        WHERE i.response_id_forms = :response_id
         LIMIT 1
     ";
 
@@ -98,12 +115,20 @@ foreach ($registros as $indice => $registro) {
     if ($existente) {
         $omitidos++;
 
+        $tokenExistente = $existente["token"] ?? null;
+
         $resultados[] = [
             "response_id_forms" => $responseId,
             "estado" => "omitido",
             "mensaje" => "La respuesta ya había sido importada.",
             "id_inscripcion" => (int) $existente["id_inscripcion"],
-            "folio" => $existente["folio"]
+            "folio" => $existente["folio"],
+            "token_qr" => $tokenExistente,
+            "url_qr" => $tokenExistente
+                ? $baseUrl .
+                    "/api/qr/imagen.php?token=" .
+                    rawurlencode((string) $tokenExistente)
+                : null
         ];
 
         continue;
@@ -288,6 +313,46 @@ foreach ($registros as $indice => $registro) {
 
         $idInscripcion =
             (int) $conexion->lastInsertId();
+
+
+        /*
+        |--------------------------------------------------------------------------
+        | GENERAR TOKEN QR PARA LA INSCRIPCIÓN
+        |--------------------------------------------------------------------------
+        | Se crea dentro de la misma transacción. Si después falla un participante
+        | o una camisa extra, el rollback también elimina este CODIGO_QR.
+        */
+
+        $tokenQr = bin2hex(random_bytes(32));
+
+        $sqlQr = "
+            INSERT INTO CODIGO_QR
+            (
+                id_inscripcion,
+                token,
+                ruta_archivo,
+                estado
+            )
+            VALUES
+            (
+                :id_inscripcion,
+                :token,
+                NULL,
+                'ACTIVO'
+            )
+        ";
+
+        $consultaQr = $conexion->prepare($sqlQr);
+
+        $consultaQr->execute([
+            ":id_inscripcion" => $idInscripcion,
+            ":token" => $tokenQr
+        ]);
+
+        $urlQr =
+            $baseUrl .
+            "/api/qr/imagen.php?token=" .
+            rawurlencode($tokenQr);
 
 
         foreach ($participantes as $numero => $participante) {
@@ -636,7 +701,9 @@ foreach ($registros as $indice => $registro) {
             "id_responsable" => $idResponsable,
             "id_inscripcion" => $idInscripcion,
             "folio_inscripcion" => $folioInscripcion,
-            "participantes" => count($participantes)
+            "participantes" => count($participantes),
+            "token_qr" => $tokenQr,
+            "url_qr" => $urlQr
         ];
 
     } catch (Throwable $e) {
