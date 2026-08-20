@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../config/conexion.php';
 
 use chillerlan\QRCode\QRCode;
 use chillerlan\QRCode\QROptions;
+use chillerlan\QRCode\Output\QRMarkupSVG;
 
 
 /*
@@ -58,12 +59,18 @@ if ($token === "") {
 
 try {
 
+    /*
+    |--------------------------------------------------------------------------
+    | CONEXIÓN A MYSQL
+    |--------------------------------------------------------------------------
+    */
+
     $pdo = obtenerConexion();
 
 
     /*
     |--------------------------------------------------------------------------
-    | COMPROBAR QUE EL TOKEN EXISTE Y ESTÁ ACTIVO
+    | VALIDAR TOKEN Y OBTENER INSCRIPCIÓN
     |--------------------------------------------------------------------------
     */
 
@@ -72,6 +79,7 @@ try {
             q.id_qr,
             q.id_inscripcion,
             q.token,
+            q.estado,
             i.folio
 
         FROM CODIGO_QR q
@@ -96,6 +104,12 @@ try {
     $registro = $stmt->fetch(PDO::FETCH_ASSOC);
 
 
+    /*
+    |--------------------------------------------------------------------------
+    | TOKEN NO VÁLIDO
+    |--------------------------------------------------------------------------
+    */
+
     if (!$registro) {
 
         http_response_code(404);
@@ -113,10 +127,11 @@ try {
 
     /*
     |--------------------------------------------------------------------------
-    | URL QUE CONTENDRÁ EL QR
+    | URL QUE SE GUARDARÁ DENTRO DEL QR
     |--------------------------------------------------------------------------
     |
-    | Al escanearlo, el celular abrirá consultar.php con el token.
+    | Cuando el celular escanee el QR, abrirá consultar.php
+    | utilizando el token de esta inscripción.
     |--------------------------------------------------------------------------
     */
 
@@ -130,13 +145,23 @@ try {
     |--------------------------------------------------------------------------
     | CONFIGURACIÓN DEL QR
     |--------------------------------------------------------------------------
+    |
+    | Utilizamos SVG porque:
+    |
+    | - no necesitamos GD
+    | - no necesitamos Imagick
+    | - es ligero
+    | - puede escanearse perfectamente con un celular
+    |--------------------------------------------------------------------------
     */
 
-    $opciones = new QROptions([
-        "outputType" => QRCode::OUTPUT_MARKUP_SVG,
-        "eccLevel"   => QRCode::ECC_M,
-        "scale"      => 8
-    ]);
+    $opciones = new QROptions;
+
+    $opciones->outputInterface =
+        QRMarkupSVG::class;
+
+    $opciones->outputBase64 =
+        false;
 
 
     /*
@@ -145,24 +170,33 @@ try {
     |--------------------------------------------------------------------------
     */
 
-    $qr = new QRCode($opciones);
+    $qr = new QRCode(
+        $opciones
+    );
 
-    $imagen = $qr->render($urlConsulta);
+
+    $imagen = $qr->render(
+        $urlConsulta
+    );
 
 
     /*
     |--------------------------------------------------------------------------
-    | DEVOLVER COMO IMAGEN SVG
+    | MOSTRAR QR COMO SVG
     |--------------------------------------------------------------------------
     */
 
-    header("Content-Type: image/svg+xml; charset=utf-8");
+    header(
+        "Content-Type: image/svg+xml; charset=utf-8"
+    );
+
 
     header(
         'Content-Disposition: inline; filename="QR-' .
         $registro["folio"] .
         '.svg"'
     );
+
 
     echo $imagen;
 
@@ -174,9 +208,13 @@ try {
         $e->getMessage()
     );
 
+
     http_response_code(500);
 
-    header("Content-Type: application/json; charset=utf-8");
+    header(
+        "Content-Type: application/json; charset=utf-8"
+    );
+
 
     echo json_encode([
         "success" => false,
