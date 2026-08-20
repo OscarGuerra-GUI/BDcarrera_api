@@ -16,7 +16,7 @@ $pdo = obtenerConexion();
 |--------------------------------------------------------------------------
 */
 
-validarApiKey();
+verificarApiKey();
 
 
 /*
