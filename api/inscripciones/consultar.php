@@ -63,6 +63,7 @@ try {
             i.folio,
             i.cantidad_participantes,
             i.estado_inscripcion,
+            i.estado_pago,
             i.fecha_inscripcion,
 
             r.id_responsable,
@@ -240,6 +241,9 @@ try {
 
             "estado" =>
                 $inscripcion["estado_inscripcion"],
+
+            "estado_pago" =>
+                $inscripcion["estado_pago"],
 
             "cantidad_participantes" =>
                 (int) $inscripcion["cantidad_participantes"],
