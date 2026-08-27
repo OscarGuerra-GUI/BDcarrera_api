@@ -32,8 +32,10 @@ $folio = trim(
     (string) ($entrada["folio"] ?? "")
 );
 
-$accion = trim(
-    (string) ($entrada["accion"] ?? "")
+$accion = strtoupper(
+    trim(
+        (string) ($entrada["accion"] ?? "")
+    )
 );
 
 if ($folio === "" || $accion === "") {
@@ -49,15 +51,17 @@ try {
 
     /*
     |--------------------------------------------------------------------------
-    | VALIDAR INSCRIPCIÓN
+    | BUSCAR INSCRIPCIÓN
     |--------------------------------------------------------------------------
     */
 
     $sqlBuscar = "
         SELECT
             id_inscripcion,
+            folio,
             estado_pago,
-            estado_inscripcion
+            estado_entrega,
+            estado_entrada
         FROM INSCRIPCION
         WHERE folio = ?
         LIMIT 1
@@ -75,51 +79,128 @@ try {
         ]);
     }
 
+    $idInscripcion =
+        (int) $inscripcion["id_inscripcion"];
+
 
     /*
     |--------------------------------------------------------------------------
-    | ACCIONES
+    | ACCIÓN: PAGO
     |--------------------------------------------------------------------------
     */
 
-    switch ($accion) {
+    if ($accion === "PAGO") {
 
-        case "PAGO":
-
-            if ($inscripcion["estado_pago"] === "PAGADO") {
-                responderJson(200, [
-                    "success" => true,
-                    "estado" => "sin_cambios",
-                    "mensaje" => "La inscripción ya estaba marcada como pagada.",
-                    "estado_pago" => "PAGADO"
-                ]);
-            }
-
-            $sql = "
-                UPDATE INSCRIPCION
-                SET estado_pago = 'PAGADO'
-                WHERE id_inscripcion = ?
-            ";
-
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([
-                $inscripcion["id_inscripcion"]
-            ]);
+        if ($inscripcion["estado_pago"] === "PAGADO") {
 
             responderJson(200, [
                 "success" => true,
-                "estado" => "actualizado",
-                "mensaje" => "Pago actualizado correctamente.",
+                "estado" => "sin_cambios",
+                "mensaje" => "La inscripción ya estaba marcada como pagada.",
                 "estado_pago" => "PAGADO"
             ]);
+        }
 
-        default:
+        $sql = "
+            UPDATE INSCRIPCION
+            SET estado_pago = 'PAGADO'
+            WHERE id_inscripcion = ?
+        ";
 
-            responderJson(400, [
-                "success" => false,
-                "mensaje" => "Acción no válida."
-            ]);
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$idInscripcion]);
+
+        responderJson(200, [
+            "success" => true,
+            "estado" => "actualizado",
+            "mensaje" => "Pago actualizado correctamente.",
+            "estado_pago" => "PAGADO"
+        ]);
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ACCIÓN: ENTREGA
+    |--------------------------------------------------------------------------
+    */
+
+    if ($accion === "ENTREGA") {
+
+        if ($inscripcion["estado_entrega"] === "ENTREGADO") {
+
+            responderJson(200, [
+                "success" => true,
+                "estado" => "sin_cambios",
+                "mensaje" => "El paquete ya estaba marcado como entregado.",
+                "estado_entrega" => "ENTREGADO"
+            ]);
+        }
+
+        $sql = "
+            UPDATE INSCRIPCION
+            SET estado_entrega = 'ENTREGADO'
+            WHERE id_inscripcion = ?
+        ";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$idInscripcion]);
+
+        responderJson(200, [
+            "success" => true,
+            "estado" => "actualizado",
+            "mensaje" => "Paquete marcado como entregado correctamente.",
+            "estado_entrega" => "ENTREGADO"
+        ]);
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ACCIÓN: ENTRADA
+    |--------------------------------------------------------------------------
+    */
+
+    if ($accion === "ENTRADA") {
+
+        if ($inscripcion["estado_entrada"] === "REGISTRADA") {
+
+            responderJson(200, [
+                "success" => true,
+                "estado" => "sin_cambios",
+                "mensaje" => "La entrada ya estaba registrada.",
+                "estado_entrada" => "REGISTRADA"
+            ]);
+        }
+
+        $sql = "
+            UPDATE INSCRIPCION
+            SET estado_entrada = 'REGISTRADA'
+            WHERE id_inscripcion = ?
+        ";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$idInscripcion]);
+
+        responderJson(200, [
+            "success" => true,
+            "estado" => "actualizado",
+            "mensaje" => "Entrada registrada correctamente.",
+            "estado_entrada" => "REGISTRADA"
+        ]);
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | ACCIÓN INVÁLIDA
+    |--------------------------------------------------------------------------
+    */
+
+    responderJson(400, [
+        "success" => false,
+        "mensaje" => "Acción no válida. Usa PAGO, ENTREGA o ENTRADA."
+    ]);
 
 } catch (Throwable $e) {
 
