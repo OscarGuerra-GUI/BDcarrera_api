@@ -35,62 +35,88 @@ $token = trim(
     (string) ($_GET["token"] ?? "")
 );
 
+$folio = trim(
+    (string) ($_GET["folio"] ?? "")
+);
 
-if ($token === "") {
+
+/*
+|--------------------------------------------------------------------------
+| DEBE RECIBIR TOKEN O FOLIO
+|--------------------------------------------------------------------------
+*/
+
+if ($token === "" && $folio === "") {
 
     responderJson(400, [
         "success" => false,
-        "mensaje" => "Debes proporcionar el token del QR."
+        "mensaje" => "Debes proporcionar un token QR o un folio."
     ]);
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| SI BUSCA POR FOLIO, EXIGIMOS API KEY
+|--------------------------------------------------------------------------
+*/
+
+if ($folio !== "") {
+
+    verificarApiKey();
 }
 
 
 try {
 
-    /*
-    |--------------------------------------------------------------------------
-    | 1. BUSCAR QR + INSCRIPCIÓN + RESPONSABLE + PAQUETE
-    |--------------------------------------------------------------------------
-    */
 
-    $sql = "
-        SELECT
-            q.id_qr,
-            q.token,
-            q.estado AS estado_qr,
+$sql = "
+    SELECT
+        q.id_qr,
+        q.token,
+        q.estado AS estado_qr,
 
-            i.id_inscripcion,
-            i.folio,
-            i.cantidad_participantes,
-            i.estado_inscripcion,
-            i.estado_pago,
-            i.estado_entrega,
-            i.estado_entrada,
-            i.fecha_inscripcion,
+        i.id_inscripcion,
+        i.folio,
+        i.cantidad_participantes,
+        i.estado_inscripcion,
+        i.estado_pago,
+        i.estado_entrega,
+        i.estado_entrada,
+        i.fecha_inscripcion,
 
-            r.id_responsable,
-            r.nombre_completo AS responsable_nombre,
+        r.id_responsable,
+        r.nombre_completo AS responsable_nombre,
 
-            pa.id_paquete,
-            pa.nombre AS paquete_nombre
+        pa.id_paquete,
+        pa.nombre AS paquete_nombre
 
-        FROM CODIGO_QR q
+    FROM INSCRIPCION i
 
-        INNER JOIN INSCRIPCION i
-            ON i.id_inscripcion = q.id_inscripcion
+    INNER JOIN RESPONSABLE r
+        ON r.id_responsable = i.id_responsable
 
-        INNER JOIN RESPONSABLE r
-            ON r.id_responsable = i.id_responsable
+    INNER JOIN PAQUETE pa
+        ON pa.id_paquete = i.id_paquete
 
-        INNER JOIN PAQUETE pa
-            ON pa.id_paquete = i.id_paquete
+    LEFT JOIN CODIGO_QR q
+        ON q.id_inscripcion = i.id_inscripcion
+";
 
+
+/*
+|--------------------------------------------------------------------------
+| DETERMINAR SI BUSCAMOS POR TOKEN O POR FOLIO
+|--------------------------------------------------------------------------
+*/
+
+if ($token !== "") {
+
+    $sql .= "
         WHERE q.token = ?
           AND q.estado = 'ACTIVO'
-
         LIMIT 1
     ";
-
 
     $stmt = $pdo->prepare($sql);
 
@@ -98,8 +124,23 @@ try {
         $token
     ]);
 
+} else {
 
-    $inscripcion = $stmt->fetch(PDO::FETCH_ASSOC);
+    $sql .= "
+        WHERE i.folio = ?
+        LIMIT 1
+    ";
+
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->execute([
+        $folio
+    ]);
+}
+
+
+$inscripcion =
+    $stmt->fetch(PDO::FETCH_ASSOC);
 
 
     /*
@@ -112,7 +153,7 @@ try {
 
         responderJson(404, [
             "success" => false,
-            "mensaje" => "QR no válido, inactivo o no encontrado."
+            "mensaje" => "Inscripción no encontrada."
         ]);
     }
 
