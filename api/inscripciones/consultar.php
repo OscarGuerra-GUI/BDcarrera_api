@@ -78,6 +78,7 @@ $sql = "
 
         i.id_inscripcion,
         i.folio,
+        i.codigo_patrocinador,
         i.cantidad_participantes,
         i.estado_inscripcion,
         i.estado_pago,
@@ -296,6 +297,9 @@ $inscripcion =
 
             "cantidad_participantes" =>
                 (int) $inscripcion["cantidad_participantes"],
+
+            "codigo_patrocinador" => 
+                $inscripcion["codigo_patrocinador"] ?? null,
 
             "fecha_inscripcion" =>
                 $inscripcion["fecha_inscripcion"]
