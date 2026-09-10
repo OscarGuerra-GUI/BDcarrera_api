@@ -234,7 +234,8 @@ foreach ($registros as $indice => $registro) {
     "Inscripción Estudiante" =>
         "Paquete Estudiante",
 
-    "Inscripción 1 niño (Máximo 12 años)" =>
+    "Inscripción 1 niño (Máximo 12 años)",
+    "Paquete 1 niño (Máximo 12 años)" =>
         "Paquete niño",
 
     default =>
