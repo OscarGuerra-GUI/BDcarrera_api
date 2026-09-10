@@ -132,6 +132,8 @@ try {
 
         $camisaExtra = null;
 
+        $codigoPatrocinador = null;
+
 
         /*
         |--------------------------------------------------------------------------
@@ -139,20 +141,23 @@ try {
         |--------------------------------------------------------------------------
         */
 
-        if ($opcion === "Paquete 1 participante") {
+        if ($opcion === "Inscripción 1 participante") {
 
-            agregarParticipante(
-                $participantes,
-                $hoja,
-                $fila,
-                "J",
-                "L",
-                "M",
-                "N",
-                false,
-                celda($hoja, "K", $fila)
-            );
-        }
+    $codigoPatrocinador =
+        normalizarCodigoPatrocinador(
+            celda($hoja, "K", $fila)
+        );
+
+    agregarParticipante(
+        $participantes,
+        $hoja,
+        $fila,
+        "J",
+        "L",
+        "M",
+        "N"
+    );
+}
 
 
         /*
@@ -161,18 +166,23 @@ try {
         |--------------------------------------------------------------------------
         */
 
-        elseif ($opcion === "Paquete Estudiante") {
+        elseif ($opcion === "Inscripción Estudiante") {
 
-            agregarParticipante(
-                $participantes,
-                $hoja,
-                $fila,
-                "O",
-                "P",
-                "Q",
-                "R"
-            );
-        }
+    $codigoPatrocinador =
+        normalizarCodigoPatrocinador(
+            celda($hoja, "P", $fila)
+        );
+
+    agregarParticipante(
+        $participantes,
+        $hoja,
+        $fila,
+        "O",
+        "Q",
+        "R",
+        "S"
+    );
+}
 
 
         /*
@@ -181,28 +191,33 @@ try {
         |--------------------------------------------------------------------------
         */
 
-        elseif ($opcion === "Paquete 2 participantes") {
+        elseif ($opcion === "Inscripción 2 participantes") {
 
-            agregarParticipante(
-                $participantes,
-                $hoja,
-                $fila,
-                "S",
-                "T",
-                "U",
-                "V"
-            );
+    $codigoPatrocinador =
+        normalizarCodigoPatrocinador(
+            celda($hoja, "U", $fila)
+        );
 
-            agregarParticipante(
-                $participantes,
-                $hoja,
-                $fila,
-                "W",
-                "X",
-                "Y",
-                "Z"
-            );
-        }
+    agregarParticipante(
+        $participantes,
+        $hoja,
+        $fila,
+        "T",
+        "V",
+        "W",
+        "X"
+    );
+
+    agregarParticipante(
+        $participantes,
+        $hoja,
+        $fila,
+        "Y",
+        "Z",
+        "AA",
+        "AB"
+    );
+}
 
 
         /*
@@ -211,38 +226,43 @@ try {
         |--------------------------------------------------------------------------
         */
 
-        elseif ($opcion === "Paquete 3 participantes") {
+        elseif ($opcion === "Inscripción 3 participantes") {
 
-            agregarParticipante(
-                $participantes,
-                $hoja,
-                $fila,
-                "AA",
-                "AB",
-                "AC",
-                "AD"
-            );
+    $codigoPatrocinador =
+        normalizarCodigoPatrocinador(
+            celda($hoja, "AD", $fila)
+        );
 
-            agregarParticipante(
-                $participantes,
-                $hoja,
-                $fila,
-                "AE",
-                "AF",
-                "AG",
-                "AH"
-            );
+    agregarParticipante(
+        $participantes,
+        $hoja,
+        $fila,
+        "AC",
+        "AE",
+        "AF",
+        "AG"
+    );
 
-            agregarParticipante(
-                $participantes,
-                $hoja,
-                $fila,
-                "AI",
-                "AJ",
-                "AK",
-                "AL"
-            );
-        }
+    agregarParticipante(
+        $participantes,
+        $hoja,
+        $fila,
+        "AH",
+        "AI",
+        "AJ",
+        "AK"
+    );
+
+    agregarParticipante(
+        $participantes,
+        $hoja,
+        $fila,
+        "AL",
+        "AM",
+        "AN",
+        "AO"
+    );
+}
 
 
         /*
@@ -251,48 +271,53 @@ try {
         |--------------------------------------------------------------------------
         */
 
-        elseif ($opcion === "Paquete 4 participantes") {
+        elseif ($opcion === "Inscripción 4 participantes") {
 
-            agregarParticipante(
-                $participantes,
-                $hoja,
-                $fila,
-                "AM",
-                "AN",
-                "AO",
-                "AP"
-            );
+    $codigoPatrocinador =
+        normalizarCodigoPatrocinador(
+            celda($hoja, "AQ", $fila)
+        );
 
-            agregarParticipante(
-                $participantes,
-                $hoja,
-                $fila,
-                "AQ",
-                "AR",
-                "AS",
-                "AT"
-            );
+    agregarParticipante(
+        $participantes,
+        $hoja,
+        $fila,
+        "AP",
+        "AR",
+        "AS",
+        "AT"
+    );
 
-            agregarParticipante(
-                $participantes,
-                $hoja,
-                $fila,
-                "AU",
-                "AV",
-                "AW",
-                "AX"
-            );
+    agregarParticipante(
+        $participantes,
+        $hoja,
+        $fila,
+        "AU",
+        "AV",
+        "AW",
+        "AX"
+    );
 
-            agregarParticipante(
-                $participantes,
-                $hoja,
-                $fila,
-                "AY",
-                "AZ",
-                "BA",
-                "BB"
-            );
-        }
+    agregarParticipante(
+        $participantes,
+        $hoja,
+        $fila,
+        "AY",
+        "AZ",
+        "BA",
+        "BB"
+    );
+
+    agregarParticipante(
+        $participantes,
+        $hoja,
+        $fila,
+        "BC",
+        "BD",
+        "BE",
+        "BF"
+    );
+}
 
 
         /*
@@ -301,58 +326,63 @@ try {
         |--------------------------------------------------------------------------
         */
 
-        elseif ($opcion === "Paquete 5 participantes") {
+        elseif ($opcion === "Inscripción 5 participantes") {
 
-            agregarParticipante(
-                $participantes,
-                $hoja,
-                $fila,
-                "BC",
-                "BD",
-                "BE",
-                "BF"
-            );
+    $codigoPatrocinador =
+        normalizarCodigoPatrocinador(
+            celda($hoja, "BH", $fila)
+        );
 
-            agregarParticipante(
-                $participantes,
-                $hoja,
-                $fila,
-                "BG",
-                "BH",
-                "BI",
-                "BJ"
-            );
+    agregarParticipante(
+        $participantes,
+        $hoja,
+        $fila,
+        "BG",
+        "BI",
+        "BJ",
+        "BK"
+    );
 
-            agregarParticipante(
-                $participantes,
-                $hoja,
-                $fila,
-                "BK",
-                "BL",
-                "BM",
-                "BN"
-            );
+    agregarParticipante(
+        $participantes,
+        $hoja,
+        $fila,
+        "BL",
+        "BM",
+        "BN",
+        "BO"
+    );
 
-            agregarParticipante(
-                $participantes,
-                $hoja,
-                $fila,
-                "BO",
-                "BP",
-                "BQ",
-                "BR"
-            );
+    agregarParticipante(
+        $participantes,
+        $hoja,
+        $fila,
+        "BP",
+        "BQ",
+        "BR",
+        "BS"
+    );
 
-            agregarParticipante(
-                $participantes,
-                $hoja,
-                $fila,
-                "BS",
-                "BT",
-                "BU",
-                "BV"
-            );
-        }
+    agregarParticipante(
+        $participantes,
+        $hoja,
+        $fila,
+        "BT",
+        "BU",
+        "BV",
+        "BW"
+    );
+
+    agregarParticipante(
+        $participantes,
+        $hoja,
+        $fila,
+        "BX",
+        "BY",
+        "BZ",
+        "CA"
+    );
+}
 
 
         /*
@@ -362,20 +392,25 @@ try {
         */
 
         elseif (
-            $opcion ===
-            "Persona con Discapacidad, Adulto mayor o en Proceso Oncológico"
-        ) {
+    $opcion ===
+    "Persona con Discapacidad, Adulto mayor o en Proceso Oncológico"
+) {
 
-            agregarParticipante(
-                $participantes,
-                $hoja,
-                $fila,
-                "BW",
-                "BX",
-                "BY",
-                "BZ"
-            );
-        }
+    $codigoPatrocinador =
+        normalizarCodigoPatrocinador(
+            celda($hoja, "CC", $fila)
+        );
+
+    agregarParticipante(
+        $participantes,
+        $hoja,
+        $fila,
+        "CB",
+        "CD",
+        "CE",
+        "CF"
+    );
+}
 
 
         /*
@@ -385,41 +420,46 @@ try {
         */
 
         elseif (
-            $opcion ===
-            "Paquete Familiar (2 adultos y 1 niño)"
-        ) {
+    $opcion ===
+    "Paquete Familiar (2 adultos y 1 niño)"
+) {
 
-            agregarParticipante(
-                $participantes,
-                $hoja,
-                $fila,
-                "CA",
-                "CB",
-                "CC",
-                "CD"
-            );
+    $codigoPatrocinador =
+        normalizarCodigoPatrocinador(
+            celda($hoja, "CH", $fila)
+        );
 
-            agregarParticipante(
-                $participantes,
-                $hoja,
-                $fila,
-                "CE",
-                "CF",
-                "CG",
-                "CH"
-            );
+    agregarParticipante(
+        $participantes,
+        $hoja,
+        $fila,
+        "CG",
+        "CI",
+        "CJ",
+        "CK"
+    );
 
-            agregarParticipante(
-                $participantes,
-                $hoja,
-                $fila,
-                "CI",
-                null,
-                "CJ",
-                "CK",
-                true
-            );
-        }
+    agregarParticipante(
+        $participantes,
+        $hoja,
+        $fila,
+        "CL",
+        "CM",
+        "CN",
+        "CO"
+    );
+
+    agregarParticipante(
+        $participantes,
+        $hoja,
+        $fila,
+        "CP",
+        null,
+        "CQ",
+        "CR",
+        true
+    );
+}
 
 
         /*
@@ -428,19 +468,27 @@ try {
         |--------------------------------------------------------------------------
         */
 
-        elseif ($opcion === "Paquete niño") {
+        elseif (
+    $opcion === "Inscripción 1 niño (Máximo 12 años)" ||
+    $opcion === "Paquete 1 niño (Máximo 12 años)"
+) {
 
-            agregarParticipante(
-                $participantes,
-                $hoja,
-                $fila,
-                "CL",
-                null,
-                "CM",
-                "CN",
-                true
-            );
-        }
+    $codigoPatrocinador =
+        normalizarCodigoPatrocinador(
+            celda($hoja, "CT", $fila)
+        );
+
+    agregarParticipante(
+        $participantes,
+        $hoja,
+        $fila,
+        "CS",
+        null,
+        "CU",
+        "CV",
+        true
+    );
+}
 
 
         /*
@@ -450,91 +498,94 @@ try {
         */
 
         elseif (
-            $opcion ===
-            "Paquete Colaborativo (10 personas + 1 Kit de regalo)"
-        ) {
+    $opcion ===
+    "Paquete Colaborativo (10 personas + 1 Kit de regalo)"
+) {
 
-            $grupos = [
-                ["CO", "CP", "CQ", "CR"],
-                ["CS", "CT", "CU", "CV"],
-                ["CW", "CX", "CY", "CZ"],
-                ["DA", "DB", "DC", "DD"],
-                ["DE", "DF", "DG", "DH"],
-                ["DI", "DJ", "DK", "DL"],
-                ["DM", "DN", "DO", "DP"],
-                ["DQ", "DR", "DS", "DT"],
-                ["DU", "DV", "DW", "DX"],
-                ["DY", "DZ", "EA", "EB"]
-            ];
+    $codigoPatrocinador =
+        normalizarCodigoPatrocinador(
+            celda($hoja, "CX", $fila)
+        );
 
+    $grupos = [
+        ["CW", "CY", "CZ", "DA"],
+        ["DB", "DC", "DD", "DE"],
+        ["DF", "DG", "DH", "DI"],
+        ["DJ", "DK", "DL", "DM"],
+        ["DN", "DO", "DP", "DQ"],
+        ["DR", "DS", "DT", "DU"],
+        ["DV", "DW", "DX", "DY"],
+        ["DZ", "EA", "EB", "EC"],
+        ["ED", "EE", "EF", "EG"],
+        ["EH", "EI", "EJ", "EK"]
+    ];
 
-            foreach ($grupos as $grupo) {
+    foreach ($grupos as $grupo) {
 
-                agregarParticipante(
-                    $participantes,
-                    $hoja,
-                    $fila,
-                    $grupo[0],
-                    $grupo[1],
-                    $grupo[2],
-                    $grupo[3]
-                );
-            }
-
-
-            $datoKit = celda(
-                $hoja,
-                "EC",
-                $fila
-            );
-
-            $sexoKit = celda(
-                $hoja,
-                "ED",
-                $fila
-            );
-
-            $camisaKit = celda(
-                $hoja,
-                "EE",
-                $fila
-            );
+        agregarParticipante(
+            $participantes,
+            $hoja,
+            $fila,
+            $grupo[0],
+            $grupo[1],
+            $grupo[2],
+            $grupo[3]
+        );
+    }
 
 
-            if ($camisaKit !== "") {
+    $datoKit = celda(
+        $hoja,
+        "EL",
+        $fila
+    );
 
-                [
-                    $tipoPersonaKit,
-                    $tallaKit
-                ] = separarCamisa($camisaKit);
+    $sexoKit = celda(
+        $hoja,
+        "EM",
+        $fila
+    );
+
+    $camisaKit = celda(
+        $hoja,
+        "EN",
+        $fila
+    );
 
 
-                $camisaExtra = [
+    if ($camisaKit !== "") {
 
-                    "nombre" =>
-                        $datoKit,
+        [
+            $tipoPersonaKit,
+            $tallaKit
+        ] = separarCamisa($camisaKit);
 
-                    "sexo" =>
-                        $sexoKit,
+        $camisaExtra = [
 
-                    "tipo_persona" =>
-                        $tipoPersonaKit,
+            "nombre" =>
+                $datoKit,
 
-                    "talla" =>
-                        $tallaKit,
+            "sexo" =>
+                $sexoKit,
 
-                    "tipo_camisa" =>
-                        $tipoPersonaKit,
+            "tipo_persona" =>
+                $tipoPersonaKit,
 
-                    "cantidad" =>
-                        1,
+            "talla" =>
+                $tallaKit,
 
-                    "motivo" =>
-                        "Kit de regalo paquete colaborativo"
+            "tipo_camisa" =>
+                $tipoPersonaKit,
 
-                ];
-            }
-        }
+            "cantidad" =>
+                1,
+
+            "motivo" =>
+                "Kit de regalo paquete colaborativo"
+
+        ];
+    }
+}
 
 
         /*
@@ -544,91 +595,94 @@ try {
         */
 
         elseif (
-            $opcion ===
-            "Paquete estudiantes (10 estudiantes + 1 Kit de regalo)"
-        ) {
+    $opcion ===
+    "Paquete estudiantes (10 estudiantes + 1 Kit de regalo)"
+) {
 
-            $grupos = [
-                ["EF", "EG", "EH", "EI"],
-                ["EJ", "EK", "EL", "EM"],
-                ["EN", "EO", "EP", "EQ"],
-                ["ER", "ES", "ET", "EU"],
-                ["EV", "EW", "EX", "EY"],
-                ["EZ", "FA", "FB", "FC"],
-                ["FD", "FE", "FF", "FG"],
-                ["FH", "FI", "FJ", "FK"],
-                ["FL", "FM", "FN", "FO"],
-                ["FP", "FQ", "FR", "FS"]
-            ];
+    $codigoPatrocinador =
+        normalizarCodigoPatrocinador(
+            celda($hoja, "EP", $fila)
+        );
 
+    $grupos = [
+        ["EO", "EQ", "ER", "ES"],
+        ["ET", "EU", "EV", "EW"],
+        ["EX", "EY", "EZ", "FA"],
+        ["FB", "FC", "FD", "FE"],
+        ["FF", "FG", "FH", "FI"],
+        ["FJ", "FK", "FL", "FM"],
+        ["FN", "FO", "FP", "FQ"],
+        ["FR", "FS", "FT", "FU"],
+        ["FV", "FW", "FX", "FY"],
+        ["FZ", "GA", "GB", "GC"]
+    ];
 
-            foreach ($grupos as $grupo) {
+    foreach ($grupos as $grupo) {
 
-                agregarParticipante(
-                    $participantes,
-                    $hoja,
-                    $fila,
-                    $grupo[0],
-                    $grupo[1],
-                    $grupo[2],
-                    $grupo[3]
-                );
-            }
-
-
-            $datoKit = celda(
-                $hoja,
-                "FT",
-                $fila
-            );
-
-            $sexoKit = celda(
-                $hoja,
-                "FU",
-                $fila
-            );
-
-            $camisaKit = celda(
-                $hoja,
-                "FV",
-                $fila
-            );
+        agregarParticipante(
+            $participantes,
+            $hoja,
+            $fila,
+            $grupo[0],
+            $grupo[1],
+            $grupo[2],
+            $grupo[3]
+        );
+    }
 
 
-            if ($camisaKit !== "") {
+    $datoKit = celda(
+        $hoja,
+        "GD",
+        $fila
+    );
 
-                [
-                    $tipoPersonaKit,
-                    $tallaKit
-                ] = separarCamisa($camisaKit);
+    $sexoKit = celda(
+        $hoja,
+        "GE",
+        $fila
+    );
+
+    $camisaKit = celda(
+        $hoja,
+        "GF",
+        $fila
+    );
 
 
-                $camisaExtra = [
+    if ($camisaKit !== "") {
 
-                    "nombre" =>
-                        $datoKit,
+        [
+            $tipoPersonaKit,
+            $tallaKit
+        ] = separarCamisa($camisaKit);
 
-                    "sexo" =>
-                        $sexoKit,
+        $camisaExtra = [
 
-                    "tipo_persona" =>
-                        $tipoPersonaKit,
+            "nombre" =>
+                $datoKit,
 
-                    "talla" =>
-                        $tallaKit,
+            "sexo" =>
+                $sexoKit,
 
-                    "tipo_camisa" =>
-                        $tipoPersonaKit,
+            "tipo_persona" =>
+                $tipoPersonaKit,
 
-                    "cantidad" =>
-                        1,
+            "talla" =>
+                $tallaKit,
 
-                    "motivo" =>
-                        "Kit de regalo paquete estudiantes"
+            "tipo_camisa" =>
+                $tipoPersonaKit,
 
-                ];
-            }
-        }
+            "cantidad" =>
+                1,
+
+            "motivo" =>
+                "Kit de regalo paquete estudiantes"
+
+        ];
+    }
+}
 
 
         /*
@@ -678,7 +732,10 @@ try {
                     1,
 
                 "opcion_inscripcion" =>
-                    $opcion
+                    $opcion,
+
+                "codigo_patrocinador" =>
+                    $codigoPatrocinador
 
             ],
 
@@ -719,6 +776,34 @@ try {
 }
 
 
+function normalizarCodigoPatrocinador(
+    string $codigo
+): ?string {
+
+    $codigo = trim($codigo);
+
+    if ($codigo === "") {
+        return null;
+    }
+
+    /*
+     * En algunas respuestas de Forms,
+     * la persona puede seleccionar/escribir "No".
+     * Eso no es realmente un código.
+     */
+
+    if (
+        strcasecmp($codigo, "No") === 0 ||
+        strcasecmp($codigo, "N/A") === 0 ||
+        strcasecmp($codigo, "NA") === 0
+    ) {
+        return null;
+    }
+
+    return $codigo;
+}
+
+
 /*
 |--------------------------------------------------------------------------
 | LEER CELDA
@@ -755,8 +840,7 @@ function agregarParticipante(
     ?string $colSexo,
     string $colCamisa,
     string $colCategoria,
-    bool $forzarNino = false,
-    ?string $codigoPatrocinador = null
+    bool $forzarNino = false
 ): void {
 
     $nombre = celda(
@@ -809,16 +893,6 @@ function agregarParticipante(
     }
 
 
-    $codigoPatrocinador =
-        trim((string) $codigoPatrocinador);
-
-
-    if ($codigoPatrocinador === "") {
-
-        $codigoPatrocinador = null;
-    }
-
-
     $participantes[] = [
 
         "nombre_completo" =>
@@ -839,8 +913,6 @@ function agregarParticipante(
         "tipo_camisa" =>
             $tipoPersona,
 
-        "codigo_patrocinador" =>
-            $codigoPatrocinador
 
     ];
 }
