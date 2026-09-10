@@ -141,7 +141,10 @@ try {
         |--------------------------------------------------------------------------
         */
 
-        if ($opcion === "Inscripción 1 participante") {
+        if (
+    $opcion === "Inscripción 1 participante" ||
+    $opcion === "Paquete 1 participante"
+) {
 
     $codigoPatrocinador =
         normalizarCodigoPatrocinador(
@@ -166,7 +169,10 @@ try {
         |--------------------------------------------------------------------------
         */
 
-        elseif ($opcion === "Inscripción Estudiante") {
+        elseif (
+    $opcion === "Inscripción Estudiante" ||
+    $opcion === "Paquete Estudiante"
+) {
 
     $codigoPatrocinador =
         normalizarCodigoPatrocinador(
@@ -191,7 +197,10 @@ try {
         |--------------------------------------------------------------------------
         */
 
-        elseif ($opcion === "Inscripción 2 participantes") {
+        elseif (
+    $opcion === "Inscripción 2 participantes" ||
+    $opcion === "Paquete 2 participantes"
+) {
 
     $codigoPatrocinador =
         normalizarCodigoPatrocinador(
@@ -226,7 +235,10 @@ try {
         |--------------------------------------------------------------------------
         */
 
-        elseif ($opcion === "Inscripción 3 participantes") {
+        elseif (
+    $opcion === "Inscripción 3 participantes" ||
+    $opcion === "Paquete 3 participantes"
+) {
 
     $codigoPatrocinador =
         normalizarCodigoPatrocinador(
@@ -271,7 +283,10 @@ try {
         |--------------------------------------------------------------------------
         */
 
-        elseif ($opcion === "Inscripción 4 participantes") {
+        elseif (
+    $opcion === "Inscripción 4 participantes" ||
+    $opcion === "Paquete 4 participantes"
+) {
 
     $codigoPatrocinador =
         normalizarCodigoPatrocinador(
@@ -326,7 +341,10 @@ try {
         |--------------------------------------------------------------------------
         */
 
-        elseif ($opcion === "Inscripción 5 participantes") {
+        elseif (
+    $opcion === "Inscripción 5 participantes" ||
+    $opcion === "Paquete 5 participantes"
+) {
 
     $codigoPatrocinador =
         normalizarCodigoPatrocinador(
