@@ -171,6 +171,15 @@ foreach ($registros as $indice => $registro) {
     $opcionInscripcion = trim(
         (string) ($inscripcion["opcion_inscripcion"] ?? "")
     );
+    
+    $codigoPatrocinador = trim(
+    (string) ($inscripcion["codigo_patrocinador"] ?? "")
+    );
+
+    if ($codigoPatrocinador === "") {
+    $codigoPatrocinador = null;
+    
+    }
 
     if (
         $idEvento === false ||
@@ -204,7 +213,33 @@ foreach ($registros as $indice => $registro) {
 
 
         $conexion->beginTransaction();
+        
+        $nombrePaqueteBD = match ($opcionInscripcion) {
 
+    "Inscripción 1 participante" =>
+        "Paquete 1 participante",
+
+    "Inscripción 2 participantes" =>
+        "Paquete 2 participantes",
+
+    "Inscripción 3 participantes" =>
+        "Paquete 3 participantes",
+
+    "Inscripción 4 participantes" =>
+        "Paquete 4 participantes",
+
+    "Inscripción 5 participantes" =>
+        "Paquete 5 participantes",
+
+    "Inscripción Estudiante" =>
+        "Paquete Estudiante",
+
+    "Inscripción 1 niño (Máximo 12 años)" =>
+        "Paquete niño",
+
+    default =>
+        $opcionInscripcion
+};
 
         $sqlPaquete = "
             SELECT
@@ -219,15 +254,15 @@ foreach ($registros as $indice => $registro) {
         $consultaPaquete = $conexion->prepare($sqlPaquete);
 
         $consultaPaquete->execute([
-            ":nombre" => $opcionInscripcion
-        ]);
+    ":nombre" => $nombrePaqueteBD
+]);
 
         $paquete = $consultaPaquete->fetch();
 
         if (!$paquete) {
             throw new RuntimeException(
                 "No existe un paquete activo llamado: " .
-                $opcionInscripcion
+                $nombrePaqueteBD
             );
         }
 
@@ -273,43 +308,46 @@ foreach ($registros as $indice => $registro) {
 
 
         $sqlInscripcion = "
-            INSERT INTO INSCRIPCION
-            (
-                id_responsable,
-                id_evento,
-                id_paquete,
-                folio,
-                cantidad_participantes,
-                estado_inscripcion,
-                estado_pago,
-                response_id_forms
-            )
-            VALUES
-            (
-                :id_responsable,
-                :id_evento,
-                :id_paquete,
-                :folio,
-                :cantidad,
-                :estado_inscripcion,
-                :estado_pago,
-                :response_id_forms
-            )
-        ";
+    INSERT INTO INSCRIPCION
+    (
+        id_responsable,
+        id_evento,
+        id_paquete,
+        folio,
+        cantidad_participantes,
+        estado_inscripcion,
+        estado_pago,
+        response_id_forms,
+        codigo_patrocinador
+    )
+    VALUES
+    (
+        :id_responsable,
+        :id_evento,
+        :id_paquete,
+        :folio,
+        :cantidad,
+        :estado_inscripcion,
+        :estado_pago,
+        :response_id_forms,
+        :codigo_patrocinador
+    )
+";
 
         $consultaInscripcion =
             $conexion->prepare($sqlInscripcion);
 
         $consultaInscripcion->execute([
-            ":id_responsable" => $idResponsable,
-            ":id_evento" => $idEvento,
-            ":id_paquete" => $idPaquete,
-            ":folio" => $folioInscripcion,
-            ":cantidad" => count($participantes),
-            ":estado_inscripcion" => "REGISTRADA",
-            ":estado_pago" => "PENDIENTE",
-            ":response_id_forms" => $responseId
-        ]);
+    ":id_responsable" => $idResponsable,
+    ":id_evento" => $idEvento,
+    ":id_paquete" => $idPaquete,
+    ":folio" => $folioInscripcion,
+    ":cantidad" => count($participantes),
+    ":estado_inscripcion" => "REGISTRADA",
+    ":estado_pago" => "PENDIENTE",
+    ":response_id_forms" => $responseId,
+    ":codigo_patrocinador" => $codigoPatrocinador
+]);
 
         $idInscripcion =
             (int) $conexion->lastInsertId();
@@ -381,11 +419,6 @@ foreach ($registros as $indice => $registro) {
                 (string) ($participante["tipo_camisa"] ?? "")
             );
 
-            $codigoPatrocinador = trim(
-                (string) (
-                    $participante["codigo_patrocinador"] ?? ""
-                )
-            );
 
             if (
                 $nombreParticipante === "" ||
@@ -493,7 +526,7 @@ foreach ($registros as $indice => $registro) {
 
             $idPatrocinador = null;
 
-            if ($codigoPatrocinador !== "") {
+            if ($codigoPatrocinador !== null) {
 
                 $sqlPatrocinador = "
                     SELECT id_patrocinador
